@@ -82,6 +82,11 @@ END COMMENT-->
             border-style: solid;
             column-rule-style: solid;
         }
+
+        th, td{
+            border: 1px solid;
+            padding-inline: 5px;
+        }
     
       </style>
  </head>
@@ -118,7 +123,7 @@ END COMMENT-->
                 <table class="movieTable">
                     <thead>
                     <tr>
-                        <th>Movie Name</th><th>MPA Rating</th><th>Viewer Score</th><th></th>
+                        <th>Movie Name</th><th>MPA Rating</th><th>Viewer Score</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -134,34 +139,41 @@ END COMMENT-->
 $(".submitForm").on("click", (e)=>{
     //prevent page from refreshing upon submit
     e.preventDefault()
-    //capture the values
-    let $userSubmission=[]
+    //require that the movieName input has at least two characters
+    if( $(`input[name="movieName"]`).val().length>=2){
+        //get things setup and count the current number of rows in the table
+        let $userSubmission=[]
+        let tableCount=$(".movieTable tr").length + 1
 
-    $(".movieForm :input").each((a,b)=>{
-        //check the type of input and ignore radio and submit buttons
-       if(b.type!="radio" && b.type!="submit"){
-            $userSubmission.push(b.value)
-        }
-        //BUT if it's a radio button it will pass if the value is checked
-        else if(b.checked==true){
-            $userSubmission.push(b.value)
-        }//this IF-ELSE statement also passes over the value provided by the SUBMIT button
-    })
+        //capture the values
+        $(".movieForm :input").each((a,b)=>{
+            //check the type of input and ignore radio and submit buttons
+        if(b.type!="radio" && b.type!="submit"){
+                $userSubmission.push(b.value)
+            }
+            //BUT if it's a radio button it will pass if the value is checked
+            else if(b.checked==true){
+                $userSubmission.push(b.value)
+            }//this IF-ELSE statement also passes over the value provided by the SUBMIT button
+        })
 
-    //reset all your fields
-    $(".movieForm").trigger("reset");
+        //reset all your fields
+        $(".movieForm").trigger("reset");
 
-    //pass values to the table
-    let $newRow=""
-    $userSubmission.forEach((item)=>{
-        $newRow+=`<td>${item}</td>`    
-    })
-    //add a remove button
-    let $newButton=`<td><button class="removeMovie" onclick="reMovie();">Remove</button></td>`
-    
-    //append all this to the end of the table
-    $(".movieTable > tbody:last-child").append(`<tr id="${$userSubmission[0]}">${$newRow}${$newButton}</tr>`)
-
+        //pass values to the table
+        let $newRow=""
+        $userSubmission.forEach((item)=>{
+            $newRow+=`<td>${item}</td>`    
+        })
+        //add a remove button
+        let $newButton=`<td><button class="removeMovie" onclick="reMovie();">Remove</button></td>`
+        
+        //append all this to the end of the table
+        $(".movieTable > tbody:last-child").append(`<tr id="row-${tableCount}"">${$newRow}${$newButton}</tr>`)
+    }
+    else{
+        alert("Movie name must be 2 characters or greater.")
+    }
  })
 
  //this function allows the user to delete the row the button is currently housed in
@@ -169,6 +181,10 @@ $(".submitForm").on("click", (e)=>{
     let $deleteRow=$(':focus').closest("tr").attr("id")
     $('#'+$deleteRow).remove()
  }
+
+
+
+
 
  </script>
  </body>
