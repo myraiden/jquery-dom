@@ -75,6 +75,30 @@
 <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
 <script>
   // Add your code here!
+  //1
+  $(document).ready(()=>
+    console.log("Let’s get ready to party with jQuery!")
+  )
+  //2
+  $(".col-sm-8 img").attr("class", "image-center")
+  //3
+  $(".col-sm-8 p:last").text("")
+  //4
+  $("h1").css("font-size", Math.floor(Math.random()*100))
+  //5
+  $(".col-sm-4 ol li:last").text("I prefer Bunnies")
+  //6
+  $(".col-sm-4 ol").text("")
+  $(".col-sm-4 h4").text("Never mind the dogs, they're cute but this list doesn't explain why bunnies are so much better. Apologies for the list.")
+  //7
+  $(".mb-5").on("change",(e)=>{
+    let $rbgValues=[]
+    $(".form-control").each((a,b)=>{$rbgValues.push(b.value)})
+    $("body").css("background-color",`rgb(${$rbgValues[0]},${$rbgValues[2]},${$rbgValues[1]})`)
+  })
+  //8
+  $(".col-sm-8 img").on("click", (e)=> {$(".col-sm-8 img").remove()})
+    
 </script>
 </body>
 
