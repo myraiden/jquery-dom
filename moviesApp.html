@@ -1,0 +1,176 @@
+<!--BEGIN COMMENT
+## **Part Two - Movies App!**
+Build an application that uses jQuery to do the following:
+- Contains a form with two inputs for a title and rating along with a button to submit the form.
+- When the form is submitted, capture the values for each of the inputs and append them to the DOM along with a button to remove each title and rating from the DOM.
+- When the button to remove is clicked, remove each title and rating from the DOM.
+
+## **Further Study**
+- Ensure that the rating of a movie can only be between 0 and 10.
+- Ensure that a title has at least 2 characters in it.
+- Allow users to sort alphabetically by the title of the movie or by the rating of the movie from lowest to highest and vice versa.
+
+END COMMENT-->
+
+ <!DOCTYPE html>
+ <html lang="en">
+ <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movies App</title>
+    <link rel="stylesheet"
+    href="https://unpkg.com/bootstrap/dist/css/bootstrap.css">
+    <style>
+        /* format that beautiful form */
+        /* NOTE: Student is formatting this here because that is how the first exercise did it. 
+                   Student acknowledges a *.CSS file would be make the *.HTML file easier to read. */
+        .container{
+            float: left;
+            display: grid;
+            grid-template-columns: 300px auto ;
+        }
+        
+        .left{
+            padding-left: 20px;
+            border-radius: 5px;
+            border-style:ridge;
+        }
+
+        .right{
+            margin-left: 20px;
+        }
+
+        input[type="text"]{
+            width: 95%;
+        }
+
+        .divRating{
+            padding-block: 10px;
+        }
+
+        input[type="radio"]{
+            margin-inline: 4%
+            
+        }
+
+        .divSubmit{
+            display: flex;
+            justify-content: center;
+            padding-bottom: 5px;
+        }
+
+        .viewerScore{
+            padding-bottom: 15px;
+        }
+
+        .scoreHint{
+            visibility: hidden;
+            display: inline-block;
+            margin-inline: 15%;
+        }
+
+        .viewerScore:hover .scoreHint{
+            visibility: visible;
+        }
+
+        .viewerscore .scoreHint{
+            top: -5px;
+            left: 105%;
+        }
+
+        .movieTable{
+            border-style: solid;
+            column-rule-style: solid;
+        }
+    
+      </style>
+ </head>
+ <body>
+
+        <div class="container">
+            <div class="column left">
+                <form class="movieForm">
+                    <div class="divName" >
+                        Enter Name of Movie:
+                        <input type="text" name="movieName" placeholder="Movie Title">
+                    </div>
+                    <!-- NOTE: Student initially misunderstood the intent of the word "rating" and originally interpreted it as "MPR rating".
+                                Student elected to leave this part of the form in the assignment since it compliments the intent of the exercise.-->
+                    <div class="divRating">
+                        <input type="radio" name="movieRating" id="G" value="G" checked="true"><label for="G">G</label>
+                        <input type="radio" name="movieRating" id="PG" value="PG"><label for="PG">PG</label>
+                        <input type="radio" name="movieRating" id="PG13" value="PG13"><label for="PG13">PG-13</label>
+                        <input type="radio" name="movieRating" id="R" value="R"><label for="R">R</label>
+                    </div>
+
+                    <div class="viewerScore">
+                        Score Move out of 10:
+                        <input type="number" min="0" max="10" id="finalScore" value="5">
+                        <span class="scoreHint">10 is best, 0 is worst</span>
+                    </div>
+                    <div class="divSubmit">
+                        <button type="submit" class="submitForm">Submit Form</button>
+                    </div>
+
+                </form>
+            </div>
+            <div class="column right">
+                <table class="movieTable">
+                    <thead>
+                    <tr>
+                        <th>Movie Name</th><th>MPA Rating</th><th>Viewer Score</th><th></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+    </body>
+
+ <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+ <script>
+ //add jquery stuff here
+$(".submitForm").on("click", (e)=>{
+    //prevent page from refreshing upon submit
+    e.preventDefault()
+    //capture the values
+    let $userSubmission=[]
+
+    $(".movieForm :input").each((a,b)=>{
+        //check the type of input and ignore radio and submit buttons
+       if(b.type!="radio" && b.type!="submit"){
+            $userSubmission.push(b.value)
+        }
+        //BUT if it's a radio button it will pass if the value is checked
+        else if(b.checked==true){
+            $userSubmission.push(b.value)
+        }//this IF-ELSE statement also passes over the value provided by the SUBMIT button
+    })
+
+    //reset all your fields
+    $(".movieForm").trigger("reset");
+
+    //pass values to the table
+    let $newRow=""
+    $userSubmission.forEach((item)=>{
+        $newRow+=`<td>${item}</td>`    
+    })
+    //add a remove button
+    let $newButton=`<td><button class="removeMovie" onclick="reMovie();">Remove</button></td>`
+    
+    //append all this to the end of the table
+    $(".movieTable > tbody:last-child").append(`<tr id="${$userSubmission[0]}">${$newRow}${$newButton}</tr>`)
+
+ })
+
+ //this function allows the user to delete the row the button is currently housed in
+ function reMovie() {
+    let $deleteRow=$(':focus').closest("tr").attr("id")
+    $('#'+$deleteRow).remove()
+ }
+
+ </script>
+ </body>
+ </html>
+
