@@ -1,4 +1,4 @@
-<!--BEGIN COMMENT
+<!--BEGIN ASSIGNMENT DESCRIPTION
 ## **Part Two - Movies App!**
 Build an application that uses jQuery to do the following:
 - Contains a form with two inputs for a title and rating along with a button to submit the form.
@@ -10,7 +10,7 @@ Build an application that uses jQuery to do the following:
 - Ensure that a title has at least 2 characters in it.
 - Allow users to sort alphabetically by the title of the movie or by the rating of the movie from lowest to highest and vice versa.
 
-END COMMENT-->
+END ASSIGNMENT DESCRIPTION-->
 
  <!DOCTYPE html>
  <html lang="en">
@@ -24,26 +24,28 @@ END COMMENT-->
         /* format that beautiful form */
         /* NOTE: Student is formatting this here because that is how the first exercise did it. 
                    Student acknowledges a *.CSS file would be make the *.HTML file easier to read. */
+        /*create a container that will resize with the window*/
         .container{
             float: left;
             display: grid;
             grid-template-columns: 300px auto ;
         }
-        
+        /*left column with styling, this is the user entry*/
         .left{
+            height: fit-content;
             padding-left: 20px;
             border-radius: 5px;
             border-style:ridge;
         }
-
+        /*right column with styling, this displays the movies entered by the user*/
         .right{
             margin-left: 20px;
         }
-
+        /*style the user movieName input*/
         input[type="text"]{
             width: 95%;
         }
-
+        /*style the MPR rating selection*/
         .divRating{
             padding-block: 10px;
         }
@@ -52,23 +54,23 @@ END COMMENT-->
             margin-inline: 4%
             
         }
-
+        /*style the submission button*/
         .divSubmit{
             display: flex;
             justify-content: center;
-            padding-bottom: 5px;
+            padding-bottom: 10px;
         }
-
+        /*style the user score values*/
         .viewerScore{
             padding-bottom: 15px;
         }
-
+        /*this is a tooltip to tell the user how the scoring works*/
         .scoreHint{
             visibility: hidden;
             display: inline-block;
             margin-inline: 15%;
         }
-
+        
         .viewerScore:hover .scoreHint{
             visibility: visible;
         }
@@ -77,7 +79,7 @@ END COMMENT-->
             top: -5px;
             left: 105%;
         }
-
+        /*style the table where the user submitted movies are entered*/
         .movieTable{
             border-style: solid;
             column-rule-style: solid;
@@ -110,7 +112,7 @@ END COMMENT-->
 
                     <div class="viewerScore">
                         Score Move out of 10:
-                        <input type="number" min="0" max="10" id="finalScore" value="5">
+                        <input type="number" name="finalScore" min="0" max="10" id="finalScore" value="5">
                         <span class="scoreHint">10 is best, 0 is worst</span>
                     </div>
                     <div class="divSubmit">
@@ -136,55 +138,115 @@ END COMMENT-->
  <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
  <script>
  //add jquery stuff here
-$(".submitForm").on("click", (e)=>{
+ //create an object for the saving of movie names and a counter for giving unique IDs to each movie
+ let $allMovies={}
+ let $movieCount=0
+ 
+ //create a class for user submission of movies
+ class $userSubmission{
+    constructor(movieName,movieRating,finalScore) {
+        this.movieName=movieName;
+        this.movieRating=movieRating;
+        this.finalScore=finalScore
+    }
+ }
+
+ //handle the form when a user clicks submit
+ $(".submitForm").on("click", (e)=>{
     //prevent page from refreshing upon submit
     e.preventDefault()
-    //require that the movieName input has at least two characters
-    if( $(`input[name="movieName"]`).val().length>=2){
-        //get things setup and count the current number of rows in the table
-        let $userSubmission=[]
-        let tableCount=$(".movieTable tr").length + 1
 
+    //require that the movieName input has at least two characters
+    console.log($(`input[name="movieName"]`))
+    if( $(`input[name="movieName"]`).val().length>=2){
         //capture the values
-        $(".movieForm :input").each((a,b)=>{
-            //check the type of input and ignore radio and submit buttons
-        if(b.type!="radio" && b.type!="submit"){
-                $userSubmission.push(b.value)
-            }
-            //BUT if it's a radio button it will pass if the value is checked
-            else if(b.checked==true){
-                $userSubmission.push(b.value)
-            }//this IF-ELSE statement also passes over the value provided by the SUBMIT button
-        })
+        const $newMovie = new $userSubmission($(`input[name="movieName"]`).val(), $(`input[name="movieRating"]:checked`).val(), $(`input[name="finalScore"]`).val())
 
         //reset all your fields
         $(".movieForm").trigger("reset");
-
-        //pass values to the table
-        let $newRow=""
-        $userSubmission.forEach((item)=>{
-            $newRow+=`<td>${item}</td>`    
-        })
-        //add a remove button
-        let $newButton=`<td><button class="removeMovie" onclick="reMovie();">Remove</button></td>`
         
-        //append all this to the end of the table
-        $(".movieTable > tbody:last-child").append(`<tr id="row-${tableCount}"">${$newRow}${$newButton}</tr>`)
+        //check how many movies have been added
+        //  this increments so each new entry has a unique key regardless of whether an entry is deleted
+        if(Object.keys($allMovies)!=0){
+            $movieCount=$movieCount+1
+        }
+        //pass values to the object
+        Object.assign($allMovies, {['movie'+$movieCount]: $newMovie})
+ 
+        //generate table using the entire movie list
+        refreshMovies()
     }
+    //otherwise alert the user movieName is too short
     else{
         alert("Movie name must be 2 characters or greater.")
     }
  })
 
- //this function allows the user to delete the row the button is currently housed in
- function reMovie() {
-    let $deleteRow=$(':focus').closest("tr").attr("id")
-    $('#'+$deleteRow).remove()
+ //refresh the listed movies using the $allMovies Object
+ function refreshMovies(){
+    //clear the table but leave the header
+    $(".movieTable tr td").remove()
+
+    //generate the new table values and include a delete button that calls the remove function
+    let $newTable=""
+    Object.entries($allMovies).map((movieNumber)=>{
+            $newTable+=`<tr id="${movieNumber[0]}"><td>${movieNumber[1].movieName}</td><td>${movieNumber[1].movieRating}</td><td>${movieNumber[1].finalScore}</td><td><button class="removeMovie" onclick="reMovie();">Remove</button></td></tr>`
+    })
+    //append new table to the header
+    $(".movieTable").append($newTable)
+    
  }
 
+ //this function allows the user to delete the value from the object
+ //     this function also calls the refreshMovies function to update the table
+ function reMovie() {
+    //get the id from the row the user clicked on
+    let $deleteRow=$(':focus').closest("tr").attr("id")
+    delete $allMovies[$deleteRow]
+    refreshMovies()
+ }
 
+ //Allow users to sort alphabetically by the title of the movie or by the rating of the movie from lowest to highest and vice versa.
+ // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object
+ // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/groupBy
+ function sortMovies(sortType){
+    /*sortType will allow for:
+        movieName Sort Alphabetically
+            UP: A-Z+nums
+            DOWN: nums+Z-A
+        finalScore Sort by user rating:
+            UP: 0-10
+            DOWN: 10-0
+        OPTIONAL: Sort by MPR rating? (this might be the simplest sort because we use "groupBy" on the movieRating category)
+            UP: G, PG, PG13, R
+            DOWN: R, PG13, PG, G
 
+    */
+    //will need to make a new OBJECT to house the resorted items
+    let $sortedMovies={}
+    
+    /*EXAMPLES:
+    ES8:
+    const sortable = Object.entries(maxSpeed)
+        .sort(([,a],[,b]) => a-b)
+        .reduce((r, [k, v]) => ({ ...r, [k]: v }), {});
+    console.log(sortable);
 
+    ES10
+    const sortable = Object.fromEntries(
+        Object.entries(maxSpeed).sort(([,a],[,b]) => a-b)
+    );
+    console.log(sortable);
+
+    SOURCE:
+    https://stackoverflow.com/questions/1069666/sorting-object-property-by-values
+    */
+
+    //Pass $sortedMovies back to $userSubmissions at the end and call refreshMovies()
+    delete $allMovies
+    Object.assign($allMovies, $sortedMovies)
+    refreshMovies()
+ }
 
  </script>
  </body>
