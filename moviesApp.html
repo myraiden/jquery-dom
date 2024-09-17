@@ -89,7 +89,32 @@ END ASSIGNMENT DESCRIPTION-->
             border: 1px solid;
             padding-inline: 5px;
         }
-    
+
+        th {
+            min-width: 70px;
+            padding-top: 5px;
+        }
+        /*style the sorting buttons for the table*/
+        .buttonSort {
+            border: solid black;
+            border-width: 0 3px 3px 0;
+            display: inline-block;
+            padding: 3px;
+            margin-inline: 2px;
+        }
+
+        .up {
+            transform: rotate(-135deg);
+            -webkit-transform: rotate(-135deg);
+            position: absolute;
+            
+        }
+
+        .down {
+            transform: rotate(45deg);
+            -webkit-transform: rotate(45deg);
+        }
+
       </style>
  </head>
  <body>
@@ -125,7 +150,9 @@ END ASSIGNMENT DESCRIPTION-->
                 <table class="movieTable">
                     <thead>
                     <tr>
-                        <th>Movie Name</th><th>MPA Rating</th><th>Viewer Score</th>
+                        <th>Movie Name <div class="buttonSort up" onclick="sortMovies('alphaAZ')"></div><div class="buttonSort down" onclick="sortMovies('alphaZA')"></div></th>
+                        <th>MPA Rating <div class="buttonSort up" onclick="sortMovies('mprGR')"></div><div class="buttonSort down" onclick="sortMovies('mprRG')"></div></th>
+                        <th>Viewer Score <div class="buttonSort up" onclick="sortMovies('scoreBS')"></div><div class="buttonSort down" onclick="sortMovies('scoreSB')"></div></th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -151,6 +178,7 @@ END ASSIGNMENT DESCRIPTION-->
     }
  }
 
+ 
  //handle the form when a user clicks submit
  $(".submitForm").on("click", (e)=>{
     //prevent page from refreshing upon submit
@@ -174,7 +202,7 @@ END ASSIGNMENT DESCRIPTION-->
         Object.assign($allMovies, {['movie'+$movieCount]: $newMovie})
  
         //generate table using the entire movie list
-        refreshMovies()
+        refreshMovies($allMovies)
     }
     //otherwise alert the user movieName is too short
     else{
@@ -183,17 +211,21 @@ END ASSIGNMENT DESCRIPTION-->
  })
 
  //refresh the listed movies using the $allMovies Object
- function refreshMovies(){
+ function refreshMovies($movieObject){
     //clear the table but leave the header
     $(".movieTable tr td").remove()
 
     //generate the new table values and include a delete button that calls the remove function
     let $newTable=""
-    Object.entries($allMovies).map((movieNumber)=>{
+    Object.entries($movieObject).map((movieNumber)=>{
             $newTable+=`<tr id="${movieNumber[0]}"><td>${movieNumber[1].movieName}</td><td>${movieNumber[1].movieRating}</td><td>${movieNumber[1].finalScore}</td><td><button class="removeMovie" onclick="reMovie();">Remove</button></td></tr>`
     })
     //append new table to the header
     $(".movieTable").append($newTable)
+
+    //set the current movies object equal to the new table so it doesn't change if the user has run this after a sort
+    //  this also ensures the user deleting a movie doesn't force the table to go back to it's pre-sorted state
+    $allMovies={...$movieObject}
     
  }
 
@@ -203,49 +235,35 @@ END ASSIGNMENT DESCRIPTION-->
     //get the id from the row the user clicked on
     let $deleteRow=$(':focus').closest("tr").attr("id")
     delete $allMovies[$deleteRow]
-    refreshMovies()
+    refreshMovies($allMovies)
  }
 
  //Allow users to sort alphabetically by the title of the movie or by the rating of the movie from lowest to highest and vice versa.
- // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object
- // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/groupBy
- function sortMovies(sortType){
-    /*sortType will allow for:
-        movieName Sort Alphabetically
-            UP: A-Z+nums
-            DOWN: nums+Z-A
-        finalScore Sort by user rating:
-            UP: 0-10
-            DOWN: 10-0
-        OPTIONAL: Sort by MPR rating? (this might be the simplest sort because we use "groupBy" on the movieRating category)
-            UP: G, PG, PG13, R
-            DOWN: R, PG13, PG, G
+ function sortMovies($sortType){
+   let $sortedMovies={}
 
-    */
-    //will need to make a new OBJECT to house the resorted items
-    let $sortedMovies={}
-    
-    /*EXAMPLES:
-    ES8:
-    const sortable = Object.entries(maxSpeed)
-        .sort(([,a],[,b]) => a-b)
-        .reduce((r, [k, v]) => ({ ...r, [k]: v }), {});
-    console.log(sortable);
+    if($sortType=='alphaAZ'){
+        //sort movieName : a to z
+        $sortedMovies=Object.values($allMovies).sort((a,b)=>{return a.movieName.localeCompare(b.movieName)})
+    }else if($sortType=='alphaZA'){
+        //sort movieName : z to a
+        $sortedMovies=Object.values($allMovies).sort((a,b)=>{return b.movieName.localeCompare(a.movieName)})
+    }else if($sortType=='scoreSB'){   
+        //sort finalScore : 0 to 10
+        $sortedMovies=Object.values($allMovies).sort((a,b)=>{return a.finalScore-b.finalScore})
+    }else if($sortType=='scoreBS'){
+        //sort finalScore : 10 to 0
+        $sortedMovies=Object.values($allMovies).sort((a,b)=>{return b.finalScore-a.finalScore})
+    }else if($sortType=='mprGR'){
+        //sort MPR rating G to R
+        $sortedMovies=Object.values($allMovies).sort((a,b)=>{return a.movieRating.localeCompare(b.movieRating)})
+    }else if($sortType=='mprRG'){
+        //sort MPR rating R to G
+        $sortedMovies=Object.values($allMovies).sort((a,b)=>{return b.movieRating.localeCompare(a.movieRating)})
+    }
 
-    ES10
-    const sortable = Object.fromEntries(
-        Object.entries(maxSpeed).sort(([,a],[,b]) => a-b)
-    );
-    console.log(sortable);
-
-    SOURCE:
-    https://stackoverflow.com/questions/1069666/sorting-object-property-by-values
-    */
-
-    //Pass $sortedMovies back to $userSubmissions at the end and call refreshMovies()
-    delete $allMovies
-    Object.assign($allMovies, $sortedMovies)
-    refreshMovies()
+    //Pass $sortedMovies back to refreshMovies() to show new table
+    refreshMovies($sortedMovies)
  }
 
  </script>
